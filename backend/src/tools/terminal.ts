@@ -1,14 +1,22 @@
 import { exec } from "child_process";
 
-export function runCommand(command: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        reject(stderr || error.message);
-        return;
-      }
+export interface CommandResult {
+  success: boolean;
+  stdout: string;
+  stderr: string;
+}
 
-      resolve(stdout);
+export function runCommand(
+  command: string,
+  cwd?: string
+): Promise<CommandResult> {
+  return new Promise((resolve) => {
+    exec(command, { cwd }, (error, stdout, stderr) => {
+      resolve({
+        success: !error,
+        stdout,
+        stderr,
+      });
     });
   });
 }
