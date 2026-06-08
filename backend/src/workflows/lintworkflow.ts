@@ -2,12 +2,14 @@ import { runCommand } from "../tools/terminal.js";
 import { parseEslintOutput } from "../parsers/eslintParser.js";
 import { analyzeLintIssues } from "../analyzers/lintAnalyzer.js";
 import { makeLintDecision } from "../decisions/lintDecision.js";
+import { executeLintAction } from "../actions/lintActions.js";
+import type { LintWorkflowContext } from "../types/workflow.js";
 
 export async function lintWorkflow() {
   console.log("Running lint workflow...");
 
-  //workflow: orchestrator -> tool -> parser -> analyser -> decision
-  //runCommand -> parseEslintOutput -> analyzeLintIssues -> makeLintDecision
+  //workflow: orchestrator -> tool -> parser -> analyser -> decision -> action
+  //runCommand -> parseEslintOutput -> analyzeLintIssues -> makeLintDecision -> executeLintAction
   //tool
   const result = await runCommand("npx eslint .", "../sandbox/sample-project");
 
@@ -31,4 +33,14 @@ export async function lintWorkflow() {
 
   console.log("Decision:");
   console.log(decision);
+
+  const context: LintWorkflowContext = {
+    issues,
+    analysis,
+    decision,
+  };
+
+  //action
+  await executeLintAction(context);
+  console.log("Lint workflow completed.");
 }
