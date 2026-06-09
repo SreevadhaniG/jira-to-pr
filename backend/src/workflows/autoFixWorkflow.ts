@@ -1,30 +1,71 @@
-import { readFileContent } from "../tools/file.js";
+import { readFileContent, writeFileContent } from "../tools/file.js";
 import { buildLintFixPrompt } from "../prompts/lintFixPrompt.js";
+import { buildRetryPrompt } from "../prompts/retryPrompt.js";
 import type { LintIssue } from "../parsers/eslintParser.js";
 import { MockLLMProvider } from "../providers/llm.js";
-import { writeFileContent } from "../tools/file.js";
 import { validationWorkflow } from "./validationWorkflow.js";
+import { agentConfig } from "../config/agent.js";
 
-export async function autoFixWorkflow(issue: LintIssue) {
+export async function autoFixWorkflow(
+  issue: LintIssue
+) {
   console.log("Starting auto-fix workflow...");
 
   const content = await readFileContent(issue.file);
 
-  const prompt = buildLintFixPrompt(issue, content);
+  let prompt = buildLintFixPrompt(
+    issue,
+    content
+  );
 
   const provider = new MockLLMProvider();
 
-  const fixedCode = await provider.generate(prompt);
+  for (
+    let attempt = 1;
+    attempt <= agentConfig.maxRetries;
+    attempt++
+  ) {
+    console.log(`\nAttempt ${attempt}`);
 
-  await writeFileContent(issue.file, fixedCode);
+    const fixedCode =
+      await provider.generate(prompt);
 
-  console.log("Updated file with generated fix.");
+    await writeFileContent(
+      issue.file,
+      fixedCode
+    );
 
-  const isValid = await validationWorkflow();
+    console.log(
+      "Updated file with generated fix."
+    );
 
-  if (isValid) {
-    console.log("Auto-fix validated successfully.");
-  } else {
+    const validationResult =
+      await validationWorkflow();
+
+    if (validationResult.success) {
+      console.log(
+        "Auto-fix validated successfully."
+      );
+      return;
+    }
+
     console.log("Validation failed.");
+
+    if (
+      attempt < agentConfig.maxRetries
+    ) {
+      console.log(
+        "Building retry prompt..."
+      );
+
+      prompt = buildRetryPrompt(
+        prompt,
+        validationResult.output
+      );
+    }
   }
+
+  console.log(
+    "Maximum retry attempts reached."
+  );
 }

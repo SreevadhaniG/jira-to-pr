@@ -1,6 +1,7 @@
 import { runCommand } from "../tools/terminal.js";
+import type { ValidationResult } from "../types/validation.js";
 
-export async function validationWorkflow() {
+export async function validationWorkflow(): Promise<ValidationResult> {
   console.log("Starting validation workflow...");
 
   const result = await runCommand(
@@ -11,5 +12,8 @@ export async function validationWorkflow() {
   console.log("Validation Result:");
   console.log(result.success);
 
-  return result.success;
+  return {
+    success: result.success,
+    output: result.stdout + result.stderr,
+  };
 }
