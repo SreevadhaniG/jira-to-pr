@@ -2,14 +2,13 @@ import { runCommand } from "../tools/terminal.js";
 import { parseEslintOutput } from "../parsers/eslintParser.js";
 import { analyzeLintIssues } from "../analyzers/lintAnalyzer.js";
 import { makeLintDecision } from "../decisions/lintDecision.js";
-import { executeLintAction } from "../actions/lintActions.js";
 import type { LintWorkflowContext } from "../types/workflow.js";
 
 export async function lintWorkflow() {
   console.log("Running lint workflow...");
 
-  //workflow: orchestrator -> tool -> parser -> analyser -> decision -> action
-  //runCommand -> parseEslintOutput -> analyzeLintIssues -> makeLintDecision -> executeLintAction
+  //workflow: orchestrator -> tool -> parser -> analyser -> decision
+  //runCommand -> parseEslintOutput -> analyzeLintIssues -> makeLintDecision
   //tool
   const result = await runCommand("npx eslint .", "../sandbox/sample-project");
 
@@ -40,7 +39,8 @@ export async function lintWorkflow() {
     decision,
   };
 
-  //action
-  await executeLintAction(context);
-  console.log("Lint workflow completed.");
+  //action is taken by the autoFixWorkflow based on the decision made here. Call is invoked from the orchestrator.
+  //context is being returned to the orchestrator.
+
+  return context;
 }
