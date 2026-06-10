@@ -8,7 +8,7 @@ export async function prWorkflow(issue: LintIssue): Promise<PullRequestDraft> {
 
   const prompt = buildPRPrompt(issue);
 
-  const provider = new MockLLMProvider();
+  const provider = getLLMProvider();
 
   const pr = await provider.generatePR(prompt);
 

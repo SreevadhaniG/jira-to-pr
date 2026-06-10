@@ -23,7 +23,7 @@ export async function commitWorkflow(issue: LintIssue): Promise<boolean> {
 
   const prompt = buildCommitPrompt(issue);
 
-  const provider = new MockLLMProvider();
+  const provider = getLLMProvider();
 
   const commitMessage = await provider.generateCommitMessage(prompt);
 

@@ -18,7 +18,7 @@ export async function autoFixWorkflow(
     content
   );
 
-  const provider = new MockLLMProvider();
+  const provider = getLLMProvider();
 
   for (
     let attempt = 1;
