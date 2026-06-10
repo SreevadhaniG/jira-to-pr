@@ -11,9 +11,8 @@ export async function getCurrentBranch() {
 export async function createBranch(
   branchName: string
 ) {
-  const result = await runCommand(
-    `git checkout -b ${branchName}`
+  return await runCommand(
+    `git checkout -b ${branchName}`,
+    "../sandbox/sample-project"
   );
-
-  return result;
 }

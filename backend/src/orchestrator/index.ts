@@ -19,7 +19,7 @@ export async function startOrchestrator() {
       return;
     }
 
-    await branchWorkflow();
+    await branchWorkflow(issue);
     await autoFixWorkflow(issue);
   }
   console.log("Orchestrator Finished");
