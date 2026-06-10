@@ -1,8 +1,9 @@
 import { MockLLMProvider } from "../providers/llm.js";
 import { buildPRPrompt } from "../prompts/prPrompt.js";
 import type { LintIssue } from "../parsers/eslintParser.js";
+import type { PullRequestDraft } from "../types/pr.js";
 
-export async function prWorkflow(issue: LintIssue) {
+export async function prWorkflow(issue: LintIssue): Promise<PullRequestDraft> {
   console.log("Starting PR workflow...");
 
   const prompt = buildPRPrompt(issue);
