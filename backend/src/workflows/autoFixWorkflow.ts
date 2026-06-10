@@ -8,7 +8,7 @@ import { agentConfig } from "../config/agent.js";
 
 export async function autoFixWorkflow(
   issue: LintIssue
-) {
+): Promise<boolean> {
   console.log("Starting auto-fix workflow...");
 
   const content = await readFileContent(issue.file);
@@ -46,7 +46,7 @@ export async function autoFixWorkflow(
       console.log(
         "Auto-fix validated successfully."
       );
-      return;
+      return true;
     }
 
     console.log("Validation failed.");
@@ -68,4 +68,6 @@ export async function autoFixWorkflow(
   console.log(
     "Maximum retry attempts reached."
   );
+
+  return false;
 }

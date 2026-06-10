@@ -1,6 +1,8 @@
 import { lintWorkflow } from "../workflows/lintworkflow.js";
 import { branchWorkflow } from "../workflows/branchWorkflow.js";
 import { autoFixWorkflow } from "../workflows/autoFixWorkflow.js";
+import { commitWorkflow } from "../workflows/commitWorkflow.js";
+import { prWorkflow } from "../workflows/prWorkflow.js";
 
 export async function startOrchestrator() {
   console.log("Orchestrator Started");
@@ -20,7 +22,16 @@ export async function startOrchestrator() {
     }
 
     await branchWorkflow(issue);
-    await autoFixWorkflow(issue);
+
+    const fixed = await autoFixWorkflow(issue);
+
+    if (fixed) {
+      const committed = await commitWorkflow(issue);
+
+      if (committed) {
+        await prWorkflow(issue);
+      }
+    }
   }
   console.log("Orchestrator Finished");
 }
