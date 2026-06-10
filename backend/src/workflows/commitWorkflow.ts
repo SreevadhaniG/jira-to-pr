@@ -1,4 +1,4 @@
-import { MockLLMProvider } from "../providers/llm.js";
+import { getLLMProvider } from "../providers/index.js";
 import { gitStatus, gitAdd, gitCommit } from "../tools/git.js";
 import { buildCommitPrompt } from "../prompts/commitPrompt.js";
 import type { LintIssue } from "../parsers/eslintParser.js";

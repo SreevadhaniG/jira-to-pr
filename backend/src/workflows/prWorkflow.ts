@@ -1,4 +1,4 @@
-import { MockLLMProvider } from "../providers/llm.js";
+import { getLLMProvider } from "../providers/index.js";
 import { buildPRPrompt } from "../prompts/prPrompt.js";
 import type { LintIssue } from "../parsers/eslintParser.js";
 import type { PullRequestDraft } from "../types/pr.js";

@@ -1,12 +1,13 @@
 import { runCommand } from "../tools/terminal.js";
 import type { ValidationResult } from "../types/validation.js";
+import type { RepositoryContext } from "../types/repository.js";
 
-export async function validationWorkflow(): Promise<ValidationResult> {
+export async function validationWorkflow(repository: RepositoryContext): Promise<ValidationResult> {
   console.log("Starting validation workflow...");
 
   const result = await runCommand(
     "npx eslint .",
-    "../sandbox/sample-project"
+    repository.repositoryPath
   );
 
   console.log("Validation Result:");

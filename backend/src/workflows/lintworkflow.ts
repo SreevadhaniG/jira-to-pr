@@ -3,14 +3,15 @@ import { parseEslintOutput } from "../parsers/eslintParser.js";
 import { analyzeLintIssues } from "../analyzers/lintAnalyzer.js";
 import { makeLintDecision } from "../decisions/lintDecision.js";
 import type { LintWorkflowContext } from "../types/workflow.js";
+import type { RepositoryContext } from "../types/repository.js";
 
-export async function lintWorkflow() {
+export async function lintWorkflow(repository: RepositoryContext) {
   console.log("Running lint workflow...");
 
   //workflow: orchestrator -> tool -> parser -> analyser -> decision
   //runCommand -> parseEslintOutput -> analyzeLintIssues -> makeLintDecision
   //tool
-  const result = await runCommand("npx eslint .", "../sandbox/sample-project");
+  const result = await runCommand("npx eslint .", repository.repositoryPath);
 
   console.log("Lint workflow result:");
   console.log(result.success);

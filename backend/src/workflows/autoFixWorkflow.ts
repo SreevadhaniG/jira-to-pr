@@ -2,12 +2,13 @@ import { readFileContent, writeFileContent } from "../tools/file.js";
 import { buildLintFixPrompt } from "../prompts/lintFixPrompt.js";
 import { buildRetryPrompt } from "../prompts/retryPrompt.js";
 import type { LintIssue } from "../parsers/eslintParser.js";
-import { MockLLMProvider } from "../providers/llm.js";
+import { getLLMProvider } from "../providers/index.js";
 import { validationWorkflow } from "./validationWorkflow.js";
 import { agentConfig } from "../config/agent.js";
+import type { RepositoryContext } from "../types/repository.js";
 
 export async function autoFixWorkflow(
-  issue: LintIssue
+  issue: LintIssue, repository: RepositoryContext
 ): Promise<boolean> {
   console.log("Starting auto-fix workflow...");
 
@@ -40,7 +41,7 @@ export async function autoFixWorkflow(
     );
 
     const validationResult =
-      await validationWorkflow();
+      await validationWorkflow(repository);
 
     if (validationResult.success) {
       console.log(
