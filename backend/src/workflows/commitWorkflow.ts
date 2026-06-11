@@ -2,11 +2,12 @@ import { getLLMProvider } from "../providers/index.js";
 import { gitStatus, gitAdd, gitCommit } from "../tools/git.js";
 import { buildCommitPrompt } from "../prompts/commitPrompt.js";
 import type { LintIssue } from "../parsers/eslintParser.js";
+import type { RepositoryContext } from "../types/repository.js";
 
-export async function commitWorkflow(issue: LintIssue): Promise<boolean> {
+export async function commitWorkflow(issue: LintIssue, repository: RepositoryContext): Promise<boolean> {
   console.log("Starting commit workflow...");
 
-  const statusResult = await gitStatus();
+  const statusResult = await gitStatus(repository);
 
   const hasChanges = statusResult.stdout.trim().length > 0;
 
@@ -17,7 +18,7 @@ export async function commitWorkflow(issue: LintIssue): Promise<boolean> {
 
   console.log("Changes detected.");
 
-  await gitAdd();
+  await gitAdd(repository);
 
   console.log("Files staged.");
 
@@ -27,7 +28,7 @@ export async function commitWorkflow(issue: LintIssue): Promise<boolean> {
 
   const commitMessage = await provider.generateCommitMessage(prompt);
 
-  const result = await gitCommit(commitMessage);
+  const result = await gitCommit(commitMessage, repository);
 
   if (!result.success) {
     console.log("Commit failed.");

@@ -1,29 +1,60 @@
 import { runCommand } from "./terminal.js";
+import type { RepositoryContext } from "../types/repository.js";
 
-export async function getCurrentBranch() {
-  const result = await runCommand("git branch --show-current");
+export async function getCurrentBranch(
+  repository: RepositoryContext
+) {
+  const result = await runCommand(
+    "git branch --show-current",
+    repository.repositoryPath
+  );
 
   return result.stdout.trim();
 }
 
-export async function createBranch(branchName: string) {
+export async function createBranch(
+  branchName: string,
+  repository: RepositoryContext
+) {
   return await runCommand(
     `git checkout -b ${branchName}`,
-    "../sandbox/sample-project",
+    repository.repositoryPath
   );
 }
 
-export async function gitStatus() {
-  return await runCommand("git status --short", "../sandbox/sample-project");
+export async function gitStatus(
+  repository: RepositoryContext
+) {
+  return await runCommand(
+    "git status --short",
+    repository.repositoryPath
+  );
 }
 
-export async function gitAdd() {
-  return await runCommand("git add .", "../sandbox/sample-project");
+export async function gitAdd(
+  repository: RepositoryContext
+) {
+  return await runCommand(
+    "git add .",
+    repository.repositoryPath
+  );
 }
 
-export async function gitCommit(message: string) {
+export async function gitCommit(
+  message: string,
+  repository: RepositoryContext
+) {
   return await runCommand(
     `git commit -m "${message}"`,
-    "../sandbox/sample-project",
+    repository.repositoryPath
+  );
+}
+
+export async function gitClone(
+  repositoryUrl: string,
+  destinationPath: string
+) {
+  return await runCommand(
+    `git clone ${repositoryUrl} "${destinationPath}"`
   );
 }
