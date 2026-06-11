@@ -4,17 +4,25 @@ export function buildPRPrompt(
   issue: LintIssue
 ): string {
   return `
-Generate a pull request title and description.
+You are generating a pull request.
 
 Issue:
 ${issue.message}
 
-Return:
+Return ONLY a JSON object.
 
-Title:
-...
+Example:
 
-Description:
-...
+{
+  "title": "Fix unused variable warning",
+  "description": "Removes the unused variable and resolves the ESLint warning."
+}
+
+Rules:
+- Return valid JSON only.
+- Do not use markdown.
+- Do not use code fences.
+- Do not provide multiple options.
+- Do not include explanations.
 `;
 }
