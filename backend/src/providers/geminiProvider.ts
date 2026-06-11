@@ -39,9 +39,12 @@ export class GeminiProvider implements LLMProvider {
 
     const text = response.text ?? "";
 
-    return {
-      title: text,
-      description: text,
-    };
+    console.log("Raw PR Response:");
+
+    console.log(text);
+
+    const pr = JSON.parse(text) as PullRequestDraft;
+
+    return pr;
   }
 }
