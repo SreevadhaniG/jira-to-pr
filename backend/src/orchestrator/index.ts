@@ -11,26 +11,36 @@ export async function startOrchestrator() {
   console.log("Orchestrator Started");
 
   //Repository Workflow
-  const repositoryUrl = process.env.GITHUB_LINK;
+  // const repositoryUrl = process.env.GITHUB_LINK;
 
-  if (!repositoryUrl) {
-    throw new Error("GITHUB_LINK is not configured");
-  }
+  // if (!repositoryUrl) {
+  //   throw new Error("GITHUB_LINK is not configured");
+  // }
 
-  let repository = await repositoryWorkflow(repositoryUrl);
+  // let repository = await repositoryWorkflow(repositoryUrl);
 
-  if (!repository.exists) {
-    //Clone Repository Workflow
-    const cloned = await cloneRepositoryWorkflow(repository);
+  // if (!repository.exists) {
+  //   //Clone Repository Workflow
+  //   const cloned = await cloneRepositoryWorkflow(repository);
 
-    if (!cloned) {
-      console.log("Cloning unable to continue.");
+  //   if (!cloned) {
+  //     console.log("Cloning unable to continue.");
 
-      return;
-    }
+  //     return;
+  //   }
 
-    repository = await repositoryWorkflow(repositoryUrl);
-  }
+  //   repository = await repositoryWorkflow(repositoryUrl);
+  // }
+
+  const repository = {
+    repositoryUrl: "local-test",
+    repositoryPath: "C:/Users/Sreevadhani_Kongu/jira-to-pr/sandbox/sample-project",
+    exists: true,
+  };
+
+  console.log("Repository Info:");
+
+  console.log(repository);
 
   //Repository Analysis Workflow
   const analysis = await repositoryAnalysisWorkflow(repository);

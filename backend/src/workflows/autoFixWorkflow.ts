@@ -6,69 +6,51 @@ import { getLLMProvider } from "../providers/index.js";
 import { validationWorkflow } from "./validationWorkflow.js";
 import { agentConfig } from "../config/agent.js";
 import type { RepositoryContext } from "../types/repository.js";
+import { extractCodeFromResponse } from "../providers/llm.js";
 
 export async function autoFixWorkflow(
-  issue: LintIssue, repository: RepositoryContext
+  issue: LintIssue,
+  repository: RepositoryContext,
 ): Promise<boolean> {
   console.log("Starting auto-fix workflow...");
 
   const content = await readFileContent(issue.file);
 
-  let prompt = buildLintFixPrompt(
-    issue,
-    content
-  );
+  let prompt = buildLintFixPrompt(issue, content);
 
   const provider = getLLMProvider();
 
-  for (
-    let attempt = 1;
-    attempt <= agentConfig.maxRetries;
-    attempt++
-  ) {
+  for (let attempt = 1; attempt <= agentConfig.maxRetries; attempt++) {
     console.log(`\nAttempt ${attempt}`);
 
-    const fixedCode =
-      await provider.generate(prompt);
+    const response = await provider.generate(prompt);
 
-    await writeFileContent(
-      issue.file,
-      fixedCode
-    );
+    const fixedCode = extractCodeFromResponse(response);
 
-    console.log(
-      "Updated file with generated fix."
-    );
+    console.log("Generated Fix:");
+    console.log(fixedCode);
 
-    const validationResult =
-      await validationWorkflow(repository);
+    await writeFileContent(issue.file, fixedCode);
+
+    console.log("Updated file with generated fix.");
+
+    const validationResult = await validationWorkflow(repository);
 
     if (validationResult.success) {
-      console.log(
-        "Auto-fix validated successfully."
-      );
+      console.log("Auto-fix validated successfully.");
       return true;
     }
 
     console.log("Validation failed.");
 
-    if (
-      attempt < agentConfig.maxRetries
-    ) {
-      console.log(
-        "Building retry prompt..."
-      );
+    if (attempt < agentConfig.maxRetries) {
+      console.log("Building retry prompt...");
 
-      prompt = buildRetryPrompt(
-        prompt,
-        validationResult.output
-      );
+      prompt = buildRetryPrompt(prompt, validationResult.output);
     }
   }
 
-  console.log(
-    "Maximum retry attempts reached."
-  );
+  console.log("Maximum retry attempts reached.");
 
   return false;
 }

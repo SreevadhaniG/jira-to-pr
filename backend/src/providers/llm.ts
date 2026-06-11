@@ -1,5 +1,8 @@
+import type { PullRequestDraft } from "../types/pr.js";
 export interface LLMProvider {
   generate(prompt: string): Promise<string>;
+  generateCommitMessage(prompt: string): Promise<string>;
+  generatePR(prompt: string): Promise<PullRequestDraft>;
 }
 
 let callCount = 0;
@@ -44,4 +47,13 @@ console.log("Testing ESLint");
         "Removes the unused variable warning and updates the code to satisfy ESLint validation.",
     };
   }
+}
+
+export function extractCodeFromResponse(
+  response: string,
+): string {
+  return response
+    .replace(/^```(?:typescript|ts|javascript|js)?\n?/i, "")
+    .replace(/\n?```$/, "")
+    .trim();
 }
