@@ -34,7 +34,8 @@ export async function startOrchestrator() {
 
   const repository = {
     repositoryUrl: "local-test",
-    repositoryPath: "C:/Users/Sreevadhani_Kongu/jira-to-pr/sandbox/sample-project",
+    repositoryPath:
+      "C:/Users/Sreevadhani_Kongu/jira-to-pr/sandbox/sample-project",
     exists: true,
   };
 
@@ -63,26 +64,57 @@ export async function startOrchestrator() {
   }
 
   if (context.decision === "AUTO_FIX") {
-    const issue = context.issues[0];
+    const firstIssue = context.issues[0];
 
-    if (!issue) {
+    if (!firstIssue) {
       console.log("No issues found to fix.");
       return;
     }
 
-    //Branch Workflow
-    await branchWorkflow(issue, repository);
+    // Create branch once
+    await branchWorkflow(firstIssue, repository);
 
-    //Auto Fix Workflow
-    const fixed = await autoFixWorkflow(issue, repository);
+    const MAX_FIX_CYCLES = 10;
 
-    if (fixed) {
-      //Commit Workflow
-      const committed = await commitWorkflow(issue, repository);
+    let fixedAny = false;
+
+    for (let cycle = 1; cycle <= MAX_FIX_CYCLES; cycle++) {
+      console.log(`Fix Cycle ${cycle}`);
+
+      const lintContext = await lintWorkflow(repository);
+
+      if (lintContext.decision === "PASS") {
+        console.log("All lint issues resolved.");
+
+        break;
+      }
+
+      const issue = lintContext.issues[0];
+
+      if (!issue) {
+        console.log("No issues found.");
+
+        break;
+      }
+
+      console.log(`Fixing: ${issue.message}`);
+
+      const fixed = await autoFixWorkflow(issue, repository);
+
+      if (!fixed) {
+        console.log("Unable to fix issue.");
+
+        break;
+      }
+
+      fixedAny = true;
+    }
+
+    if (fixedAny) {
+      const committed = await commitWorkflow(firstIssue, repository);
 
       if (committed) {
-        //PR Workflow
-        await prWorkflow(issue);
+        await prWorkflow(firstIssue);
       }
     }
   }

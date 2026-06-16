@@ -2,7 +2,7 @@ import type { LLMProvider } from "./llm.js";
 import { MockLLMProvider } from "./llm.js";
 import { GeminiProvider } from "./geminiProvider.js";
 import { OpenAIProvider } from "./openaiProvider.js";
-// import { AnthropicProvider } from "./anthropicProvider.js";
+import { AnthropicProvider } from "./anthropicProvider.js";
 
 export function getLLMProvider(): LLMProvider {
   const provider = process.env.LLM_PROVIDER;
@@ -30,15 +30,13 @@ export function getLLMProvider(): LLMProvider {
       return new OpenAIProvider();
     }
 
-    // case "anthropic": {
-    //   if (!process.env.ANTHROPIC_API_KEY) {
-    //     throw new Error(
-    //       "ANTHROPIC_API_KEY is not configured"
-    //     );
-    //   }
-    //
-    //   return new AnthropicProvider();
-    // }
+    case "anthropic": {
+      if (!process.env.ANTHROPIC_API_KEY) {
+        throw new Error("ANTHROPIC_API_KEY is not configured");
+      }
+
+      return new AnthropicProvider();
+    }
 
     case "mock":
       return new MockLLMProvider();
