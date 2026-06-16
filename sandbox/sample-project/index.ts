@@ -1,5 +1,8 @@
+import fs from "fs";
 
-const unusedVariable = "hello";
+function greet(name: string, unusedParam: string) {
+  var message = "Hello, " + name;
+  console.log(message);
+}
 
-//console.log(unusedVariable);
-console.log("Testing ESLint");
+greet("Alice", "test");
