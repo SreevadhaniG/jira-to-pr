@@ -1,5 +1,3 @@
-import crypto from "crypto";
-
 type Book = {
   id: number;
   title: string;
@@ -15,9 +13,8 @@ const books: Book[] = [
 function checkoutBook(
   bookId: number,
   memberName: string,
-  unusedNote: string,
 ) {
-  var selectedBook: Book | undefined;
+  let selectedBook: Book | undefined;
 
   for (const book of books) {
     if (book.id === bookId) {
@@ -43,4 +40,4 @@ function checkoutBook(
   selectedBook.available = false;
 }
 
-checkoutBook(1, "Alice", "priority");
+checkoutBook(1, "Alice");
