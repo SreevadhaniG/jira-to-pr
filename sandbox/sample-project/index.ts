@@ -1,35 +1,46 @@
-interface User {
-  id: number;
-  name: string;
-  active: boolean;
-}
+import crypto from "crypto";
 
-const users: User[] = [
-  { id: 1, name: "Alice", active: true },
-  { id: 2, name: "Bob", active: false },
-  { id: 3, name: "Charlie", active: true },
+type Book = {
+  id: number;
+  title: string;
+  available: boolean;
+};
+
+const books: Book[] = [
+  { id: 1, title: "Clean Code", available: true },
+  { id: 2, title: "Design Patterns", available: false },
+  { id: 3, title: "Refactoring", available: true },
 ];
 
-function generateReport(
-  userList: User[],
-  verbose: boolean,
+function checkoutBook(
+  bookId: number,
+  memberName: string,
+  unusedNote: string,
 ) {
-  const activeUsers: User[] = [];
+  var selectedBook: Book | undefined;
 
-  userList.forEach((user) => {
-    if (user.active) {
-      activeUsers.push(user);
+  for (const book of books) {
+    if (book.id === bookId) {
+      selectedBook = book;
+      break;
     }
-  });
-
-  if (verbose) {
-    console.log(
-      "Found " + activeUsers.length + " active users"
-    );
   }
 
-  return activeUsers;
+  if (!selectedBook) {
+    console.log("Book not found");
+    return;
+  }
+
+  if (selectedBook.available == false) {
+    console.log("Book is unavailable");
+    return;
+  }
+
+  console.log(
+    "Book checked out by " + memberName + ": " + selectedBook.title,
+  );
+
+  selectedBook.available = false;
 }
 
-const report = generateReport(users, true);
-console.log(report);
+checkoutBook(1, "Alice", "priority");
