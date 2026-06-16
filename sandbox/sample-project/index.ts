@@ -1,43 +1,36 @@
-type Book = {
-  id: number;
-  title: string;
-  available: boolean;
-};
+import path from "path";
 
-const books: Book[] = [
-  { id: 1, title: "Clean Code", available: true },
-  { id: 2, title: "Design Patterns", available: false },
-  { id: 3, title: "Refactoring", available: true },
-];
-
-function checkoutBook(
-  bookId: number,
-  memberName: string,
+function evaluatePassword(
+  password: string,
+  showDetails: boolean,
+  unusedOption: string,
 ) {
-  let selectedBook: Book | undefined;
+  var score = 0;
 
-  for (const book of books) {
-    if (book.id === bookId) {
-      selectedBook = book;
-      break;
-    }
+  if (password.length >= 8) {
+    score++;
   }
 
-  if (!selectedBook) {
-    console.log("Book not found");
-    return;
+  if (/[A-Z]/.test(password)) {
+    score++;
   }
 
-  if (selectedBook.available == false) {
-    console.log("Book is unavailable");
-    return;
+  if (/[0-9]/.test(password)) {
+    score++;
   }
 
-  console.log(
-    "Book checked out by " + memberName + ": " + selectedBook.title,
-  );
+  if (showDetails == true) {
+    console.log("Password score: " + score);
+  }
 
-  selectedBook.available = false;
+  let result: any = "Weak";
+
+  if (score >= 3) {
+    result = "Strong";
+  }
+
+  return result;
 }
 
-checkoutBook(1, "Alice");
+const strength = evaluatePassword("MyPass123", true, "debug");
+console.log(strength);
