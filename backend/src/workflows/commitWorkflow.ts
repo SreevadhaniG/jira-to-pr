@@ -3,8 +3,12 @@ import { gitStatus, gitAdd, gitCommit } from "../tools/git.js";
 import { buildCommitPrompt } from "../prompts/commitPrompt.js";
 import type { LintIssue } from "../parsers/eslintParser.js";
 import type { RepositoryContext } from "../types/repository.js";
+import { gitDiff } from "../tools/git.js";
 
-export async function commitWorkflow(issue: LintIssue, repository: RepositoryContext): Promise<boolean> {
+export async function commitWorkflow(
+  issue: LintIssue,
+  repository: RepositoryContext,
+): Promise<boolean> {
   console.log("Starting commit workflow...");
 
   const statusResult = await gitStatus(repository);
@@ -22,7 +26,12 @@ export async function commitWorkflow(issue: LintIssue, repository: RepositoryCon
 
   console.log("Files staged.");
 
-  const prompt = buildCommitPrompt(issue);
+  const diffResult = await gitDiff(repository);
+
+  console.log("Git Diff:");
+  console.log(diffResult.stdout);
+
+  const prompt = buildCommitPrompt(diffResult.stdout);
 
   const provider = getLLMProvider();
 

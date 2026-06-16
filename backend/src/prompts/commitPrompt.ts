@@ -1,14 +1,16 @@
-import type { LintIssue } from "../parsers/eslintParser.js";
-
-export function buildCommitPrompt(
-  issue: LintIssue
-): string {
+export function buildCommitPrompt(diff: string): string {
   return `
 Generate a concise conventional commit message.
 
-Issue:
-${issue.message}
+Git Diff:
 
-Return only the commit message.
+${diff}
+
+Rules:
+- Return only the commit message.
+- Use conventional commit format.
+- Do not include markdown.
+- Do not include explanations.
+- Keep it under 72 characters.
 `;
 }
