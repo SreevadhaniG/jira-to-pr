@@ -1,5 +1,3 @@
-import fs from "fs";
-
 interface User {
   id: number;
   name: string;
@@ -15,12 +13,11 @@ const users: User[] = [
 function generateReport(
   userList: User[],
   verbose: boolean,
-  unusedFlag: string,
 ) {
-  var activeUsers = [];
+  const activeUsers: User[] = [];
 
   userList.forEach((user) => {
-    if (user.active == true) {
+    if (user.active) {
       activeUsers.push(user);
     }
   });
@@ -34,5 +31,5 @@ function generateReport(
   return activeUsers;
 }
 
-const report = generateReport(users, true, "debug");
+const report = generateReport(users, true);
 console.log(report);
