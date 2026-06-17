@@ -1,21 +1,18 @@
-import type { LintIssue } from "../parsers/eslintParser.js";
-
-export function buildPRPrompt(
-  issue: LintIssue
-): string {
+export function buildPRPrompt(diff: string): string {
   return `
 You are generating a pull request.
 
-Issue:
-${issue.message}
+Git Diff:
+
+${diff}
 
 Return ONLY a JSON object.
 
 Example:
 
 {
-  "title": "Fix unused variable warning",
-  "description": "Removes the unused variable and resolves the ESLint warning."
+  "title": "Refactor generateReport and remove unused code",
+  "description": "Removes unused imports and parameters, simplifies conditional logic, and improves type safety."
 }
 
 Rules:
@@ -24,5 +21,8 @@ Rules:
 - Do not use code fences.
 - Do not provide multiple options.
 - Do not include explanations.
+- Title and description must be based on the actual code changes in the diff.
+- Title must be concise.
+- Description must summarize the actual code changes from the diff.
 `;
 }

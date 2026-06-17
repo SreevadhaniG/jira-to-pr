@@ -6,6 +6,7 @@ import { prWorkflow } from "../workflows/prWorkflow.js";
 import { repositoryWorkflow } from "../workflows/repositoryWorkflow.js";
 import { cloneRepositoryWorkflow } from "../workflows/cloneRepositoryWorkflow.js";
 import { repositoryAnalysisWorkflow } from "../workflows/repositoryAnalysisWorkflow.js";
+import { gitDiff, gitAdd } from "../tools/git.js";
 
 export async function startOrchestrator() {
   console.log("Orchestrator Started");
@@ -34,8 +35,7 @@ export async function startOrchestrator() {
 
   const repository = {
     repositoryUrl: "local-test",
-    repositoryPath:
-      "C:/Users/Sreevadhani_Kongu/jira-to-pr/sandbox/sample-project",
+    repositoryPath: process.env.TEST_REPOSITORY_LINK || "",
     exists: true,
   };
 
@@ -111,10 +111,26 @@ export async function startOrchestrator() {
     }
 
     if (fixedAny) {
-      const committed = await commitWorkflow(firstIssue, repository);
+      await gitAdd(repository);
+
+      console.log("Files staged.");
+
+      const diffResult = await gitDiff(repository);
+
+      const diff = diffResult.stdout;
+
+      if (!diff.trim()) {
+        console.log("No changes detected.");
+        return;
+      }
+
+      console.log("Diff:");
+      console.log(diff);
+
+      const committed = await commitWorkflow(firstIssue, repository, diff);
 
       if (committed) {
-        await prWorkflow(firstIssue);
+        await prWorkflow(repository, diff);
       }
     }
   }
