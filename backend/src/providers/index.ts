@@ -3,6 +3,7 @@ import { MockLLMProvider } from "./llm.js";
 import { GeminiProvider } from "./geminiProvider.js";
 import { OpenAIProvider } from "./openaiProvider.js";
 import { AnthropicProvider } from "./anthropicProvider.js";
+import { GroqProvider } from "./groqProvider.js";
 
 export function getLLMProvider(): LLMProvider {
   const provider = process.env.LLM_PROVIDER;
@@ -36,6 +37,14 @@ export function getLLMProvider(): LLMProvider {
       }
 
       return new AnthropicProvider();
+    }
+
+    case "groq": {
+      if (!process.env.GROQ_API_KEY) {
+        throw new Error("GROQ_API_KEY is not configured");
+      }
+
+      return new GroqProvider();
     }
 
     case "mock":
