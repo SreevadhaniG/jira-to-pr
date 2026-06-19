@@ -38,6 +38,13 @@ export async function gitCommit(
   );
 }
 
+export async function gitPush(repository: RepositoryContext) {
+  return await runCommand(
+    "git push --set-upstream origin HEAD",
+    repository.repositoryPath,
+  );
+}
+
 export async function gitClone(repositoryUrl: string, destinationPath: string) {
   return await runCommand(`git clone ${repositoryUrl} "${destinationPath}"`);
 }

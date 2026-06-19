@@ -7,6 +7,7 @@ import { repositoryWorkflow } from "../workflows/repositoryWorkflow.js";
 import { cloneRepositoryWorkflow } from "../workflows/cloneRepositoryWorkflow.js";
 import { repositoryAnalysisWorkflow } from "../workflows/repositoryAnalysisWorkflow.js";
 import { gitDiff, gitAdd } from "../tools/git.js";
+import { pushWorkflow } from "../workflows/pushWorkflow.js";
 
 export async function startOrchestrator() {
   console.log("Orchestrator Started");
@@ -130,7 +131,11 @@ export async function startOrchestrator() {
       const committed = await commitWorkflow(firstIssue, repository, diff);
 
       if (committed) {
-        await prWorkflow(repository, diff);
+        const pushed = await pushWorkflow(repository);
+
+        if (pushed) {
+          await prWorkflow(repository, diff);
+        }
       }
     }
   }
