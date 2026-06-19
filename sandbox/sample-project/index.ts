@@ -1,23 +1,23 @@
-import fs from "fs";
-
-function calculateTotal(items: number[], taxRate: number) {
-    let total = 0;
-
-    for (let i = 0; i < items.length; i++) {
-        total += items[i];
-    }
-
-    const temp = total * taxRate;
-
-    if (items.length == 0) {
-        console.log("No items");
-    }
-
-    return total + temp;
+interface Order {
+  id: number;
+  amount: number;
+  status: string;
 }
 
-const result = calculateTotal([10, 20, 30], 0.1);
+function processOrder(order: Order): void {
+  const processingFee = 50;
 
-console.log(result);
+  if (order.status == "pending") {
+    console.log(`Processing order ${order.id}`);
+  }
 
-fs.readFileSync("data.txt", "utf8");
+  order.status = "completed";
+}
+
+const order: Order = {
+  id: 101,
+  amount: 2500,
+  status: "pending",
+};
+
+processOrder(order);
