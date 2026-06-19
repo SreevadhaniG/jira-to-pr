@@ -1,33 +1,25 @@
-function evaluatePassword(
-  password: string,
-  showDetails: boolean,
-) {
-  let score = 0;
+import fs from "fs";
 
-  if (password.length >= 8) {
-    score++;
-  }
+const unusedVariable = "hello";
 
-  if (/[A-Z]/.test(password)) {
-    score++;
-  }
+function calculateTotal(items: number[], taxRate: number) {
+    let total = 0;
 
-  if (/[0-9]/.test(password)) {
-    score++;
-  }
+    for (let i = 0; i < items.length; i++) {
+        total += items[i];
+    }
 
-  if (showDetails == true) {
-    console.log("Password score: " + score);
-  }
+    let temp = total * taxRate;
 
-  let result: string = "Weak";
+    if (items.length == 0) {
+        console.log("No items");
+    }
 
-  if (score >= 3) {
-    result = "Strong";
-  }
-
-  return result;
+    return total + temp;
 }
 
-const strength = evaluatePassword("MyPass123", true);
-console.log(strength);
+const result = calculateTotal([10, 20, 30], 0.1);
+
+console.log(result);
+
+fs.readFileSync("data.txt", "utf8");
