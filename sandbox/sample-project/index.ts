@@ -1,11 +1,8 @@
-import path from "path";
-
 function evaluatePassword(
   password: string,
   showDetails: boolean,
-  unusedOption: string,
 ) {
-  var score = 0;
+  let score = 0;
 
   if (password.length >= 8) {
     score++;
@@ -23,7 +20,7 @@ function evaluatePassword(
     console.log("Password score: " + score);
   }
 
-  let result: any = "Weak";
+  let result: string = "Weak";
 
   if (score >= 3) {
     result = "Strong";
@@ -32,5 +29,5 @@ function evaluatePassword(
   return result;
 }
 
-const strength = evaluatePassword("MyPass123", true, "debug");
+const strength = evaluatePassword("MyPass123", true);
 console.log(strength);
