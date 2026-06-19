@@ -1,22 +1,24 @@
-interface Order {
+interface Customer {
   id: number;
-  amount: number;
-  status: string;
+  name: string;
+  email?: string;
 }
 
-function processOrder(order: Order): void {
+function processCustomer(customer: any, discount: any) {
+  var finalAmount = 1000;
 
-  if (order.status == "pending") {
-    console.log(`Processing order ${order.id}`);
+  if (customer.id == null) {
+    return;
   }
 
-  order.status = "completed";
+  finalAmount = finalAmount - discount;
+
+  return finalAmount;
 }
 
-const order: Order = {
-  id: 101,
-  amount: 2500,
-  status: "pending",
+const customer: Customer = {
+  id: 1,
+  name: "John Doe",
 };
 
-processOrder(order);
+processCustomer(customer, 100);
