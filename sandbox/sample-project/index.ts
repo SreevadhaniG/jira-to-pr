@@ -1,7 +1,5 @@
 import fs from "fs";
 
-const unusedVariable = "hello";
-
 function calculateTotal(items: number[], taxRate: number) {
     let total = 0;
 
@@ -9,7 +7,7 @@ function calculateTotal(items: number[], taxRate: number) {
         total += items[i];
     }
 
-    let temp = total * taxRate;
+    const temp = total * taxRate;
 
     if (items.length == 0) {
         console.log("No items");
