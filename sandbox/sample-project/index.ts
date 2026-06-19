@@ -5,7 +5,6 @@ interface Order {
 }
 
 function processOrder(order: Order): void {
-  const processingFee = 50;
 
   if (order.status == "pending") {
     console.log(`Processing order ${order.id}`);
