@@ -6,8 +6,10 @@ import { prWorkflow } from "../workflows/prWorkflow.js";
 import { repositoryWorkflow } from "../workflows/repositoryWorkflow.js";
 import { cloneRepositoryWorkflow } from "../workflows/cloneRepositoryWorkflow.js";
 import { repositoryAnalysisWorkflow } from "../workflows/repositoryAnalysisWorkflow.js";
-import { gitDiff, gitAdd } from "../tools/git.js";
+import { gitDiff, gitAdd, getCurrentBranch } from "../tools/git.js";
 import { pushWorkflow } from "../workflows/pushWorkflow.js";
+import { parseGitHubRepositoryUrl } from "../utils/github.js";
+import { createPullRequestWorkflow } from "../workflows/createPullRequestWorkflow.js";
 
 export async function startOrchestrator() {
   console.log("Orchestrator Started");
@@ -35,7 +37,7 @@ export async function startOrchestrator() {
   // }
 
   const repository = {
-    repositoryUrl: "local-test",
+    repositoryUrl: process.env.TEST_REPOSITORY_URL || "",
     repositoryPath: process.env.TEST_REPOSITORY_LINK || "",
     exists: true,
   };
@@ -134,7 +136,25 @@ export async function startOrchestrator() {
         const pushed = await pushWorkflow(repository);
 
         if (pushed) {
-          await prWorkflow(repository, diff);
+          const pr = await prWorkflow(repository, diff);
+
+          const githubRepo = parseGitHubRepositoryUrl(repository.repositoryUrl);
+
+          const head = await getCurrentBranch(repository);
+
+          const prContext = {
+            owner: githubRepo.owner,
+            repo: githubRepo.repo,
+            head,
+            base: "main",
+            title: pr.title,
+            description: pr.description,
+          };
+
+          const prUrl = await createPullRequestWorkflow(prContext);
+
+          console.log("PR Created:");
+          console.log(prUrl);
         }
       }
     }
