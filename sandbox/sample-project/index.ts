@@ -5,11 +5,12 @@ interface User {
   lastLogin?: Date;
 }
 
-function CheckUserAccess(user: any, requiredRole: any) {
-  var status = "PENDING";
-  
+function CheckUserAccess(user: User, requiredRole: string): boolean | undefined {
+  void requiredRole;
+  let status = "PENDING";
+
   if (user.role == "admin") {
-    var status = "APPROVED";
+    status = "APPROVED";
     console.log("Admin bypass enabled for: " + user.id)
   }
 
