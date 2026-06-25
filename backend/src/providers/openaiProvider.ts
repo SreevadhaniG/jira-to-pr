@@ -1,5 +1,4 @@
 import type { LLMProvider } from "./llm.js";
-import type { PullRequestDraft } from "../types/pr.js";
 import OpenAI from "openai";
 
 const client = new OpenAI({
@@ -14,16 +13,5 @@ export class OpenAIProvider implements LLMProvider {
     });
 
     return response.output_text;
-  }
-
-  async generateCommitMessage(prompt: string): Promise<string> {
-    return "Temporary Commit Message";
-  }
-
-  async generatePR(prompt: string): Promise<PullRequestDraft> {
-    return {
-      title: "Temporary PR",
-      description: "Temporary Description",
-    };
   }
 }

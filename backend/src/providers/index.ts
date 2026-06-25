@@ -1,5 +1,4 @@
 import type { LLMProvider } from "./llm.js";
-import { MockLLMProvider } from "./llm.js";
 import { GeminiProvider } from "./geminiProvider.js";
 import { OpenAIProvider } from "./openaiProvider.js";
 import { AnthropicProvider } from "./anthropicProvider.js";
@@ -46,9 +45,6 @@ export function getLLMProvider(): LLMProvider {
 
       return new GroqProvider();
     }
-
-    case "mock":
-      return new MockLLMProvider();
 
     default:
       throw new Error(`Unsupported LLM provider: ${provider}`);

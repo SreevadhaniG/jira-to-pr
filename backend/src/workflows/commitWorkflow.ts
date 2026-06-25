@@ -1,7 +1,7 @@
-import { getLLMProvider } from "../providers/index.js";
 import { gitStatus, gitCommit } from "../tools/git.js";
 import { buildCommitPrompt } from "../prompts/commitPrompt.js";
 import type { RepositoryContext } from "../types/repository.js";
+import { llmService } from "../services/llmService.js";
 
 export async function commitWorkflow(
   repository: RepositoryContext,
@@ -22,9 +22,7 @@ export async function commitWorkflow(
 
   const prompt = buildCommitPrompt(diff);
 
-  const provider = getLLMProvider();
-
-  const commitMessage = await provider.generateCommitMessage(prompt);
+  const commitMessage = await llmService.generateCommitMessage(prompt);
 
   const result = await gitCommit(commitMessage, repository);
 

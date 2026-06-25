@@ -6,7 +6,7 @@ import { getLLMProvider } from "../providers/index.js";
 import { validationWorkflow } from "./validationWorkflow.js";
 import { agentConfig } from "../config/agent.js";
 import type { RepositoryContext } from "../types/repository.js";
-import { extractCodeFromResponse } from "../providers/llm.js";
+import {cleanLLMResponse} from "../utils/llm.js";
 
 export async function autoFixWorkflow(
   issue: LintIssue,
@@ -25,7 +25,7 @@ export async function autoFixWorkflow(
 
     const response = await provider.generate(prompt);
 
-    const fixedCode = extractCodeFromResponse(response);
+    const fixedCode = cleanLLMResponse(response);
 
     console.log("Generated Fix:");
     console.log(fixedCode);
