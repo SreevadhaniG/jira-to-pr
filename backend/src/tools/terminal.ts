@@ -11,9 +11,14 @@ export function runCommand(
   cwd?: string,
 ): Promise<CommandResult> {
   return new Promise((resolve) => {
+    console.log("COMMAND:", command);
+    console.log("REQUESTED CWD:", cwd);
+    console.log("PROCESS CWD:", process.cwd());
+
     exec(command, { cwd }, (error, stdout, stderr) => {
-      console.log("COMMAND:", command);
       console.log("ERROR:", error);
+      console.log("STDOUT:", stdout);
+      console.log("STDERR:", stderr);
 
       resolve({
         success: !error,

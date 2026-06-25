@@ -10,6 +10,7 @@ import { gitDiff, gitAdd, getCurrentBranch } from "../tools/git.js";
 import { pushWorkflow } from "../workflows/pushWorkflow.js";
 import { parseGitHubRepositoryUrl } from "../utils/github.js";
 import { createPullRequestWorkflow } from "../workflows/createPullRequestWorkflow.js";
+import { runCommand } from "../tools/terminal.js";
 
 export async function startOrchestrator() {
   console.log("Orchestrator Started");
@@ -74,8 +75,16 @@ export async function startOrchestrator() {
       return;
     }
 
+    const pwdResult = await runCommand("echo %cd%", repository.repositoryPath);
+    console.log("EXECUTING IN:", pwdResult.stdout);
+
     // Create branch once
-    await branchWorkflow(firstIssue, repository);
+    const branchCreated = await branchWorkflow(firstIssue, repository);
+
+    if (!branchCreated) {
+      console.log("Failed to create branch.");
+      return;
+    }
 
     const MAX_FIX_CYCLES = 10;
 
@@ -114,11 +123,21 @@ export async function startOrchestrator() {
     }
 
     if (fixedAny) {
-      await gitAdd(repository);
+      const addResult = await gitAdd(repository);
+
+      if (!addResult.success) {
+        console.log("Unable to stage files.");
+        return;
+      }
 
       console.log("Files staged.");
 
       const diffResult = await gitDiff(repository);
+
+      if (!diffResult.success) {
+        console.log("Unable to generate diff.");
+        return;
+      }
 
       const diff = diffResult.stdout;
 
@@ -130,13 +149,13 @@ export async function startOrchestrator() {
       console.log("Diff:");
       console.log(diff);
 
-      const committed = await commitWorkflow(firstIssue, repository, diff);
+      const committed = await commitWorkflow(repository, diff);
 
       if (committed) {
         const pushed = await pushWorkflow(repository);
 
         if (pushed) {
-          const pr = await prWorkflow(repository, diff);
+          const pr = await prWorkflow(diff);
 
           const githubRepo = parseGitHubRepositoryUrl(repository.repositoryUrl);
 

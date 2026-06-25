@@ -1,11 +1,9 @@
 import { getLLMProvider } from "../providers/index.js";
 import { gitStatus, gitCommit } from "../tools/git.js";
 import { buildCommitPrompt } from "../prompts/commitPrompt.js";
-import type { LintIssue } from "../parsers/eslintParser.js";
 import type { RepositoryContext } from "../types/repository.js";
 
 export async function commitWorkflow(
-  issue: LintIssue,
   repository: RepositoryContext,
   diff: string,
 ): Promise<boolean> {

@@ -52,3 +52,13 @@ export async function gitClone(repositoryUrl: string, destinationPath: string) {
 export async function gitDiff(repository: RepositoryContext) {
   return await runCommand("git diff --cached", repository.repositoryPath);
 }
+
+export async function remoteBranchExists(
+  branch: string,
+  repository: RepositoryContext,
+) {
+  return await runCommand(
+    `git ls-remote --heads origin ${branch}`,
+    repository.repositoryPath,
+  );
+}

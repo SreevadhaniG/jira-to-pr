@@ -1,10 +1,8 @@
 import { getLLMProvider } from "../providers/index.js";
 import { buildPRPrompt } from "../prompts/prPrompt.js";
 import type { PullRequestDraft } from "../types/pr.js";
-import type { RepositoryContext } from "../types/repository.js";
-import { gitDiff } from "../tools/git.js";
 
-export async function prWorkflow(repository: RepositoryContext, diff: string): Promise<PullRequestDraft> {
+export async function prWorkflow(diff: string): Promise<PullRequestDraft> {
   console.log("Starting PR workflow...");
 
   const prompt = buildPRPrompt(diff);
