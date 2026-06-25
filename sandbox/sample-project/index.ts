@@ -4,8 +4,8 @@ interface Customer {
   email?: string;
 }
 
-function processCustomer(customer: any, discount: any) {
-  var finalAmount = 1000;
+function processCustomer(customer: Customer, discount: number) {
+  let finalAmount = 1000;
 
   if (customer.id == null) {
     return;
