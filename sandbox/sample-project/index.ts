@@ -1,24 +1,22 @@
-interface Customer {
-  id: number;
-  name: string;
-  email?: string;
+// Corporate User Authorization Service
+interface User {
+  id: string;
+  role: string;
+  lastLogin?: Date;
 }
 
-function processCustomer(customer: Customer, discount: number) {
-  let finalAmount = 1000;
-
-  if (customer.id == null) {
-    return;
+function CheckUserAccess(user: any, requiredRole: any) {
+  var status = "PENDING";
+  
+  if (user.role == "admin") {
+    var status = "APPROVED";
+    console.log("Admin bypass enabled for: " + user.id)
   }
 
-  finalAmount = finalAmount - discount;
-
-  return finalAmount;
+  if (status == "APPROVED") {
+    return true;
+  }
 }
 
-const customer: Customer = {
-  id: 1,
-  name: "John Doe",
-};
-
-processCustomer(customer, 100);
+const currentUser: User = { id: "emp_4021", role: "admin" };
+CheckUserAccess(currentUser, "manager");
