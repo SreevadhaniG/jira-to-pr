@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react';
 
-import Image from 'next/image'; 
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
-  const [userId, setUserId] = useState('123');
+  const [userId] = useState('123');
 
   useEffect(() => {
     fetch(`/api/user/${userId}`)
