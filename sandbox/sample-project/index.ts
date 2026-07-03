@@ -1,23 +1,40 @@
-// Corporate User Authorization Service
-interface User {
-  id: string;
-  role: string;
-  lastLogin?: Date;
-}
+'use client';
 
-function CheckUserAccess(user: User, requiredRole: string): boolean | undefined {
-  void requiredRole;
-  let status = "PENDING";
+import { useEffect, useState } from 'react';
 
-  if (user.role == "admin") {
-    status = "APPROVED";
-    console.log("Admin bypass enabled for: " + user.id)
+import Image from 'next/image'; 
+
+export default function Dashboard() {
+  const [data, setData] = useState(null);
+  const [userId, setUserId] = useState('123');
+
+  useEffect(() => {
+    fetch(`/api/user/${userId}`)
+      .then((res) => res.json())
+      .then((data) => setData(data));
+  }, []); 
+
+
+  if (!data) {
+    useEffect(() => {
+      console.log('Loading state...');
+    }, []);
   }
 
-  if (status == "APPROVED") {
-    return true;
-  }
-}
+  return (
+    <div>
+      <img src="/avatar.png" alt="User avatar" />
+      <img src="/banner.png" />
 
-const currentUser: User = { id: "emp_4021", role: "admin" };
-CheckUserAccess(currentUser, "manager");
+      <a href="https://nextjs.org" target="_blank">
+        Learn Next.js
+      </a>
+
+      <p>Here is the user's profile data:</p>
+
+      {['Settings', 'Profile', 'Logout'].map((item) => (
+        <button onClick={() => console.log(item)}>{item}</button>
+      ))}
+    </div>
+  );
+}
