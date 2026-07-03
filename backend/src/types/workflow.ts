@@ -7,3 +7,9 @@ export interface LintWorkflowContext {
   analysis: LintAnalysis;
   decision: LintDecision;
 }
+
+export interface WorkflowResult<T = void> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}

@@ -1,9 +1,10 @@
 import { gitClone } from "../tools/git.js";
 import type { RepositoryContext } from "../types/repository.js";
+import type { WorkflowResult } from "../types/workflow.js";
 
 export async function cloneRepositoryWorkflow(
   repository: RepositoryContext,
-): Promise<boolean> {
+): Promise<WorkflowResult> {
   console.log("Starting clone repository workflow...");
 
   const result = await gitClone(
@@ -16,10 +17,15 @@ export async function cloneRepositoryWorkflow(
 
     console.log(result.stderr);
 
-    return false;
+    return {
+      success: false,
+      error: "Failed to clone repository.",
+    };
   }
 
   console.log("Repository cloned successfully.");
 
-  return true;
+  return {
+    success: true,
+  };
 }

@@ -1,9 +1,10 @@
 import { getCurrentBranch, gitPush, remoteBranchExists } from "../tools/git.js";
 import type { RepositoryContext } from "../types/repository.js";
+import type { WorkflowResult } from "../types/workflow.js";
 
 export async function pushWorkflow(
   repository: RepositoryContext,
-): Promise<boolean> {
+): Promise<WorkflowResult> {
   console.log("Starting push workflow...");
 
   const result = await gitPush(repository);
@@ -20,9 +21,16 @@ export async function pushWorkflow(
 
   if (!remoteCheck.stdout.trim()) {
     console.log("Push failed.");
-    return false;
+
+    return {
+      success: false,
+      error: "Failed to push changes.",
+    };
   }
 
   console.log("Branch pushed successfully.");
-  return true;
+
+  return {
+    success: true,
+  };
 }

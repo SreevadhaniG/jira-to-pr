@@ -1,9 +1,10 @@
 import { github } from "../github/client.js";
 import type { PullRequestContext } from "../types/github.js";
+import type { WorkflowResult } from "../types/workflow.js";
 
 export async function createPullRequestWorkflow(
   context: PullRequestContext,
-): Promise<string> {
+): Promise<WorkflowResult<string>> {
 
   const response =
     await github.rest.pulls.create({
@@ -15,5 +16,8 @@ export async function createPullRequestWorkflow(
       base: context.base,
     });
 
-  return response.data.html_url;
+  return {
+    success: true,
+    data: response.data.html_url,
+  };
 }

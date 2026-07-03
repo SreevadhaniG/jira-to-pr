@@ -2,11 +2,12 @@ import type { LintIssue } from "../parsers/eslintParser.js";
 import { getCurrentBranch, createBranch } from "../tools/git.js";
 import { generateBranchName } from "../utils/branchName.js";
 import type { RepositoryContext } from "../types/repository.js";
+import type { WorkflowResult } from "../types/workflow.js";
 
 export async function branchWorkflow(
   issue: LintIssue,
   repository: RepositoryContext,
-): Promise<boolean> {
+): Promise<WorkflowResult> {
   const currentBranch = await getCurrentBranch(repository);
 
   console.log("Current Branch:", currentBranch);
@@ -21,10 +22,16 @@ export async function branchWorkflow(
 
   if (branch !== branchName) {
     console.log("Branch creation failed.");
-    return false;
+
+    return {
+      success: false,
+      error: `Failed to create branch '${branchName}'.`,
+    };
   }
 
-  console.log("Branch created successfully.");
+  console.log("Branch created successfully");
 
-  return true;
+  return {
+    success: true,
+  };
 }

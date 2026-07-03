@@ -26,9 +26,9 @@ export async function startOrchestrator() {
 
   // if (!repository.exists) {
   //   //Clone Repository Workflow
-  //   const cloned = await cloneRepositoryWorkflow(repository);
+  //   const cloneResult = await cloneRepositoryWorkflow(repository);
 
-  //   if (!cloned) {
+  //   if (!cloneResult.success) {
   //     console.log("Cloning unable to continue.");
 
   //     return;
@@ -79,10 +79,10 @@ export async function startOrchestrator() {
     console.log("EXECUTING IN:", pwdResult.stdout);
 
     // Create branch once
-    const branchCreated = await branchWorkflow(firstIssue, repository);
+    const branchResult = await branchWorkflow(firstIssue, repository);
 
-    if (!branchCreated) {
-      console.log("Failed to create branch.");
+    if (!branchResult.success) {
+      console.log(branchResult.error);
       return;
     }
 
@@ -111,9 +111,9 @@ export async function startOrchestrator() {
 
       console.log(`Fixing: ${issue.message}`);
 
-      const fixed = await autoFixWorkflow(issue, repository);
+      const fixResult = await autoFixWorkflow(issue, repository);
 
-      if (!fixed) {
+      if (!fixResult.success) {
         console.log("Unable to fix issue.");
 
         break;
@@ -149,31 +149,41 @@ export async function startOrchestrator() {
       console.log("Diff:");
       console.log(diff);
 
-      const committed = await commitWorkflow(repository, diff);
+      const commitResult = await commitWorkflow(repository, diff);
 
-      if (committed) {
-        const pushed = await pushWorkflow(repository);
+      if (commitResult.success) {
+        const pushResult = await pushWorkflow(repository);
 
-        if (pushed) {
+        if (pushResult.success) {
           const pr = await prWorkflow(diff);
 
           const githubRepo = parseGitHubRepositoryUrl(repository.repositoryUrl);
 
           const head = await getCurrentBranch(repository);
 
+          if (!pr.success || !pr.data) {
+            console.log(pr.error);
+            return;
+          }
+
           const prContext = {
             owner: githubRepo.owner,
             repo: githubRepo.repo,
             head,
             base: "main",
-            title: pr.title,
-            description: pr.description,
+            title: pr.data.title,
+            description: pr.data.description,
           };
 
-          const prUrl = await createPullRequestWorkflow(prContext);
+          const prCreation = await createPullRequestWorkflow(prContext);
+
+          if (!prCreation.success) {
+            console.log(prCreation.error);
+            return;
+          }
 
           console.log("PR Created:");
-          console.log(prUrl);
+          console.log(prCreation.data);
         }
       }
     }

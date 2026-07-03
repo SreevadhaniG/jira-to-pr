@@ -1,12 +1,13 @@
 import { gitStatus, gitCommit } from "../tools/git.js";
 import { buildCommitPrompt } from "../prompts/commitPrompt.js";
 import type { RepositoryContext } from "../types/repository.js";
+import type { WorkflowResult } from "../types/workflow.js";
 import { llmService } from "../services/llmService.js";
 
 export async function commitWorkflow(
   repository: RepositoryContext,
   diff: string,
-): Promise<boolean> {
+): Promise<WorkflowResult> {
   console.log("Starting commit workflow...");
 
   const statusResult = await gitStatus(repository);
@@ -15,7 +16,10 @@ export async function commitWorkflow(
 
   if (!hasChanges) {
     console.log("No changes detected. Skipping commit.");
-    return false;
+    return {
+      success: false,
+      error: "No changes to commit.",
+    };
   }
 
   console.log("Changes detected.");
@@ -28,11 +32,17 @@ export async function commitWorkflow(
 
   if (!result.success) {
     console.log("Commit failed.");
-    return false;
+    
+    return {
+      success: false,
+      error: "Failed to commit changes.",
+    };
   }
 
   console.log("Commit Message:");
   console.log(commitMessage);
 
-  return true;
+  return {
+    success: true,
+  };
 }

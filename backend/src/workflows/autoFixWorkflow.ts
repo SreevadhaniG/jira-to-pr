@@ -1,17 +1,18 @@
 import { readFileContent, writeFileContent } from "../tools/file.js";
 import { buildLintFixPrompt } from "../prompts/lintFixPrompt.js";
 import { buildRetryPrompt } from "../prompts/retryPrompt.js";
-import type { LintIssue } from "../parsers/eslintParser.js";
 import { getLLMProvider } from "../providers/index.js";
 import { validationWorkflow } from "./validationWorkflow.js";
 import { agentConfig } from "../config/agent.js";
-import type { RepositoryContext } from "../types/repository.js";
 import {cleanLLMResponse} from "../utils/llm.js";
+import type { RepositoryContext } from "../types/repository.js";
+import type { LintIssue } from "../parsers/eslintParser.js";
+import type { WorkflowResult } from "../types/workflow.js";
 
 export async function autoFixWorkflow(
   issue: LintIssue,
   repository: RepositoryContext,
-): Promise<boolean> {
+): Promise<WorkflowResult> {
   console.log("Starting auto-fix workflow...");
 
   const content = await readFileContent(issue.file);
@@ -38,7 +39,9 @@ export async function autoFixWorkflow(
 
     if (validationResult.success) {
       console.log("Auto-fix validated successfully.");
-      return true;
+      return {
+        success: true
+      };
     }
 
     console.log("Validation failed.");
@@ -52,5 +55,8 @@ export async function autoFixWorkflow(
 
   console.log("Maximum retry attempts reached.");
 
-  return false;
+  return {
+    success: false,
+    error: `Failed to auto-fix issue: ${issue.message}`,
+  };
 }

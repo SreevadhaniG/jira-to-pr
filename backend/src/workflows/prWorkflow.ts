@@ -1,8 +1,9 @@
 import { buildPRPrompt } from "../prompts/prPrompt.js";
-import type { PullRequestDraft } from "../types/pr.js";
 import { llmService } from "../services/llmService.js";
+import type { PullRequestDraft } from "../types/pr.js";
+import type { WorkflowResult } from "../types/workflow.js";
 
-export async function prWorkflow(diff: string): Promise<PullRequestDraft> {
+export async function prWorkflow(diff: string): Promise<WorkflowResult<PullRequestDraft>> {
   console.log("Starting PR workflow...");
 
   const prompt = buildPRPrompt(diff);
@@ -15,5 +16,8 @@ export async function prWorkflow(diff: string): Promise<PullRequestDraft> {
   console.log("PR Description:");
   console.log(pr.description);
 
-  return pr;
+  return {
+    success: true,
+    data: pr,
+  };
 }
