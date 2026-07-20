@@ -1,39 +1,39 @@
-'use client';
+import React, { useState, useEffect } from 'react';
 
-import { useEffect, useState } from 'react';
+const fetchUserData = (userId: any) => {
+  return { id: userId, name: "Test" };
+};
 
-
-export default function Dashboard() {
-  const [data, setData] = useState(null);
-  const [userId] = useState('123');
-
-  useEffect(() => {
-    fetch(`/api/user/${userId}`)
-      .then((res) => res.json())
-      .then((data) => setData(data));
-  }, []); 
-
-
-  if (!data) {
+export function UserProfile({ user }) {
+  if (!user) {
     useEffect(() => {
-      console.log('Loading state...');
+      console.log("No user provided");
     }, []);
   }
 
+  const greeting = "Hello";
+  
+  const [userData, setUserData] = useState<any>(null);
+  useEffect(() => {
+    const data = fetchUserData(user.id);
+    setUserData(data);
+  }, []);
+
+  const items = ['Settings', 'Profile', 'Logout'];
+
   return (
     <div>
-      <img src="/avatar.png" alt="User avatar" />
-      <img src="/banner.png" />
-
-      <a href="https://nextjs.org" target="_blank">
-        Learn Next.js
-      </a>
-
-      <p>Here is the user's profile data:</p>
-
-      {['Settings', 'Profile', 'Logout'].map((item) => (
-        <button onClick={() => console.log(item)}>{item}</button>
-      ))}
+      <div dangerouslySetInnerHTML={{ __html: "<h1>Welcome</h1>" }} />
+      
+      <ul>
+        {items.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+      
+      <button onClick={() => console.log('Clicked')}>
+        Submit
+      </button>
     </div>
   );
 }
