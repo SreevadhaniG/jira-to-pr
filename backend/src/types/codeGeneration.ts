@@ -5,6 +5,6 @@ export interface GeneratedFile {
 
 export interface CodeGenerationResult {
   summary: string;
-  validationCommand: string;
+  verificationCommands: string[];
   files: GeneratedFile[];
 }

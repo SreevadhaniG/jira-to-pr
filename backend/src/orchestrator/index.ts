@@ -105,7 +105,9 @@ export async function startOrchestrator() {
   let previousValidation: ValidationResult | undefined;
 
   for (let cycle = 1; cycle <= MAX_CYCLES; cycle++) {
-    console.log(`\n========== IMPLEMENTATION CYCLE ${cycle} ==========\n`);
+    console.log("\n======================================");
+    console.log(`Implementation Cycle ${cycle}`);
+    console.log("======================================");
 
     // -------------------------------
     // Read Source Files
@@ -146,17 +148,11 @@ export async function startOrchestrator() {
     console.log("Implementation Summary:");
     console.log(implementation.summary);
 
-    console.log("Validation Command:");
-    console.log(implementation.validationCommand);
-
     // -------------------------------
     // Write Files
     // -------------------------------
 
-    const writeResult = await writeFilesWorkflow(
-      implementation,
-      repository,
-    );
+    const writeResult = await writeFilesWorkflow(implementation, repository);
 
     if (!writeResult.success) {
       console.log(writeResult.error);
@@ -171,9 +167,14 @@ export async function startOrchestrator() {
 
     console.log("Running Validation...");
 
+    console.log("Verification Commands:");
+    implementation.verificationCommands.forEach((command, index) => {
+      console.log(`${index + 1}. ${command}`);
+    });
+
     const validationResult = await validationWorkflow(
       repository,
-      implementation.validationCommand,
+      implementation.verificationCommands,
     );
 
     if (!validationResult.success) {
@@ -183,18 +184,20 @@ export async function startOrchestrator() {
 
     previousValidation = validationResult.data;
 
-    console.log(previousValidation);
-
     if (previousValidation.passed) {
       console.log("✅ Validation passed.");
       break;
     }
 
     console.log("❌ Validation failed.");
+    console.log(`Command: ${previousValidation.command}`);
     console.log(previousValidation.output);
 
     if (cycle === MAX_CYCLES) {
-      console.log("Maximum implementation attempts reached.");
+      console.log("\nMaximum implementation attempts reached.");
+      console.log("Last validation output:");
+      console.log(`Command: ${previousValidation.command}`);
+      console.log(previousValidation.output);
     }
   }
 

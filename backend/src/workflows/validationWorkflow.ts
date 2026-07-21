@@ -6,18 +6,40 @@ import type { WorkflowResult } from "../types/workflow.js";
 
 export async function validationWorkflow(
   repository: RepositoryContext,
-  command: string,
+  commands: string[],
 ): Promise<WorkflowResult<ValidationResult>> {
   console.log("Validating implementation...");
 
-  const result = await runCommand(command, repository.repositoryPath);
+  for (const command of commands) {
+    console.log(`Running: ${command}`);
+
+    const result = await runCommand(command, repository.repositoryPath);
+
+    if (!result.success) {
+      return {
+        success: true,
+        data: {
+          passed: false,
+          command,
+          output: result.stdout + result.stderr,
+        },
+      };
+    }
+  }
+
+  if (commands.length === 0) {
+    return {
+      success: false,
+      error: "No verification commands were provided.",
+    };
+  }
 
   return {
     success: true,
     data: {
-      passed: result.success,
-      command,
-      output: result.stdout + result.stderr,
+      passed: true,
+      command: commands[commands.length - 1]!,
+      output: "All verification commands passed.",
     },
   };
 }

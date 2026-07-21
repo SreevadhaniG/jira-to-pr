@@ -110,23 +110,31 @@ TASK
 ==============================
 
 1. Understand the Jira issue.
-2. If previous validation output is provided, fix those validation errors while preserving all previous correct changes.
+2. If previous validation output is provided:
+   - Analyze the validation output carefully.
+   - Fix every reported issue.
+   - Preserve all previously correct changes.
 3. Modify ONLY the provided files.
 4. Preserve existing functionality.
 5. Follow the existing project style and conventions.
 6. Do not invent files that were not provided.
 7. Return ONLY the files that require changes.
 
-Choose ONE command that best verifies your implementation for this repository.
+Determine the sequence of commands required to verify your implementation.
 
-Prefer project-specific commands such as:
-- npm run build
+Return the commands in the order they should be executed.
+
+Examples:
+
+- npx eslint .
 - npm test
+- npm run build
 - pytest
-- mvn test
 - go test ./...
 
-If no project-specific command exists, choose the most appropriate compiler or linter command.
+Prefer project-specific commands whenever available.
+
+Do not include unnecessary commands.
 
 ==============================
 OUTPUT
@@ -138,7 +146,10 @@ The JSON must exactly match this schema:
 
 {
   "summary": "Short summary of the implementation.",
-  "validationCommand": "Command used to validate the implementation.",
+  "verificationCommands": [
+    "First verification command",
+    "Second verification command"
+  ],
   "files": [
     {
       "relativePath": "relative/path/to/file",
@@ -155,5 +166,6 @@ Rules:
 - Do not use markdown.
 - Do not wrap the JSON in code fences.
 - Do not include explanations.
+- Return verification commands in execution order.
 `;
 }

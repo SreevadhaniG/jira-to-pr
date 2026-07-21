@@ -8,7 +8,6 @@ export async function sourceFileWorkflow(
   implementationPlan: ImplementationPlan,
   repository: RepositoryContext,
 ): Promise<WorkflowResult<RepositoryFile[]>> {
-  console.log("Reading source files...");
 
   const files: RepositoryFile[] = [];
 
