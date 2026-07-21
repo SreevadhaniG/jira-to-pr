@@ -1,4 +1,5 @@
 export interface ValidationResult {
-  success: boolean;
-  output: string;
+    passed: boolean;
+    command: string;
+    output: string;
 }

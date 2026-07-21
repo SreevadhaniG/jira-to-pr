@@ -2,7 +2,7 @@ import { gitStatus, gitCommit } from "../tools/git.js";
 import { buildCommitPrompt } from "../prompts/commitPrompt.js";
 import type { RepositoryContext } from "../types/repository.js";
 import type { WorkflowResult } from "../types/workflow.js";
-import { llmService } from "../services/llmService.js";
+import { llmService } from "../services/llm.js";
 
 export async function commitWorkflow(
   repository: RepositoryContext,

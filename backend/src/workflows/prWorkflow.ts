@@ -1,5 +1,5 @@
 import { buildPRPrompt } from "../prompts/prPrompt.js";
-import { llmService } from "../services/llmService.js";
+import { llmService } from "../services/llm.js";
 import type { PullRequestDraft } from "../types/pr.js";
 import type { WorkflowResult } from "../types/workflow.js";
 
