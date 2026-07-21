@@ -6,10 +6,15 @@ import { sourceFileWorkflow } from "../workflows/sourceFileWorkflow.js";
 import { implementationWorkflow } from "../workflows/implementationWorkflow.js";
 import { writeFilesWorkflow } from "../workflows/writeFilesWorkflow.js";
 import { validationWorkflow } from "../workflows/validationWorkflow.js";
+import { publishWorkflow } from "../workflows/publishWorkflow.js";
 
 import { runCommand } from "../tools/terminal.js";
 
 import type { ValidationResult } from "../types/validation.js";
+import type { CodeGenerationResult } from "../types/codeGeneration.js";
+
+import { createInterface } from "node:readline/promises";
+import { stdin as input, stdout as output } from "node:process";
 
 export async function startOrchestrator() {
   console.log("Orchestrator Started");
@@ -104,6 +109,10 @@ export async function startOrchestrator() {
 
   let previousValidation: ValidationResult | undefined;
 
+  let implementation: CodeGenerationResult | undefined;
+
+  let implementationValidated = false;
+
   for (let cycle = 1; cycle <= MAX_CYCLES; cycle++) {
     console.log("\n======================================");
     console.log(`Implementation Cycle ${cycle}`);
@@ -186,6 +195,7 @@ export async function startOrchestrator() {
 
     if (previousValidation.passed) {
       console.log("✅ Validation passed.");
+      implementationValidated = true;
       break;
     }
 
@@ -201,5 +211,62 @@ export async function startOrchestrator() {
     }
   }
 
-  console.log("Orchestrator Finished");
+  // ===============================
+  // Publishing
+  // ===============================
+
+  if (!implementationValidated) {
+    console.log("\nImplementation could not be validated.");
+    console.log("Publishing skipped.");
+    console.log("Orchestrator Finished");
+    return;
+  }
+
+  console.log("\n======================================");
+  console.log("Implementation Complete");
+  console.log("======================================");
+
+  console.log("Summary:");
+  console.log(implementation?.summary);
+
+  console.log("\nModified Files:");
+  implementation?.files.forEach((file) => {
+    console.log(`- ${file.relativePath}`);
+  });
+
+  console.log("\nBranch:");
+  console.log(branchResult.data);
+
+  const rl = createInterface({
+    input,
+    output,
+  });
+
+  const answer = await rl.question(
+    "\nWould you like to publish the changes? (y/n): ",
+  );
+
+  rl.close();
+
+  const publishApproved = answer.trim().toLowerCase() === "y";
+
+  if (!publishApproved) {
+    console.log("\nPublishing cancelled by user.");
+    console.log("Orchestrator Finished");
+    return;
+  }
+
+  console.log("\nPublishing changes...");
+
+  const publishResult = await publishWorkflow(repository);
+
+  if (!publishResult.success) {
+    console.log(publishResult.error);
+    return;
+  }
+
+  console.log("\nPull Request:");
+  console.log(publishResult.data);
+
+  console.log("\nOrchestrator Finished");
 }
