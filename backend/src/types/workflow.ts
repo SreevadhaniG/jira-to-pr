@@ -8,8 +8,12 @@ export interface LintWorkflowContext {
   decision: LintDecision;
 }
 
-export interface WorkflowResult<T = void> {
-  success: boolean;
-  data?: T;
-  error?: string;
-}
+export type WorkflowResult<T = void> =
+  | {
+      success: true;
+      data: T;
+    }
+  | {
+      success: false;
+      error: string;
+    };

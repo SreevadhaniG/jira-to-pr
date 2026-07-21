@@ -1,18 +1,19 @@
-import type { LintIssue } from "../parsers/eslintParser.js";
+import type { JiraIssue } from "../types/jira.js";
 import { getCurrentBranch, createBranch } from "../tools/git.js";
 import { generateBranchName } from "../utils/branchName.js";
 import type { RepositoryContext } from "../types/repository.js";
 import type { WorkflowResult } from "../types/workflow.js";
 
+
 export async function branchWorkflow(
-  issue: LintIssue,
+  issue: JiraIssue,
   repository: RepositoryContext,
-): Promise<WorkflowResult> {
+): Promise<WorkflowResult<string>> {
   const currentBranch = await getCurrentBranch(repository);
 
   console.log("Current Branch:", currentBranch);
 
-  const branchName = generateBranchName(issue.message);
+  const branchName = generateBranchName(issue.summary);
 
   console.log("Creating Branch:", branchName);
 
@@ -33,5 +34,6 @@ export async function branchWorkflow(
 
   return {
     success: true,
+    data: branchName,
   };
 }

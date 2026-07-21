@@ -1,41 +1,11 @@
-import { lintWorkflow } from "../workflows/lintworkflow.js";
+import { repositoryContextWorkflow } from "../workflows/repositoryContextWorkflow.js";
+import { jiraWorkflow } from "../workflows/jiraWorkflow.js";
 import { branchWorkflow } from "../workflows/branchWorkflow.js";
-import { autoFixWorkflow } from "../workflows/autoFixWorkflow.js";
-import { commitWorkflow } from "../workflows/commitWorkflow.js";
-import { prWorkflow } from "../workflows/prWorkflow.js";
-import { repositoryWorkflow } from "../workflows/repositoryWorkflow.js";
-import { cloneRepositoryWorkflow } from "../workflows/cloneRepositoryWorkflow.js";
-import { repositoryAnalysisWorkflow } from "../workflows/repositoryAnalysisWorkflow.js";
-import { gitDiff, gitAdd, getCurrentBranch } from "../tools/git.js";
-import { pushWorkflow } from "../workflows/pushWorkflow.js";
-import { parseGitHubRepositoryUrl } from "../utils/github.js";
-import { createPullRequestWorkflow } from "../workflows/createPullRequestWorkflow.js";
+import { issueResolutionWorkflow } from "../workflows/issueResoulutionWorkflow.js";
 import { runCommand } from "../tools/terminal.js";
 
 export async function startOrchestrator() {
   console.log("Orchestrator Started");
-
-  //Repository Workflow
-  // const repositoryUrl = process.env.GITHUB_LINK;
-
-  // if (!repositoryUrl) {
-  //   throw new Error("GITHUB_LINK is not configured");
-  // }
-
-  // let repository = await repositoryWorkflow(repositoryUrl);
-
-  // if (!repository.exists) {
-  //   //Clone Repository Workflow
-  //   const cloneResult = await cloneRepositoryWorkflow(repository);
-
-  //   if (!cloneResult.success) {
-  //     console.log("Cloning unable to continue.");
-
-  //     return;
-  //   }
-
-  //   repository = await repositoryWorkflow(repositoryUrl);
-  // }
 
   const repository = {
     repositoryUrl: process.env.TEST_REPOSITORY_URL || "",
@@ -44,149 +14,91 @@ export async function startOrchestrator() {
   };
 
   console.log("Repository Info:");
-
   console.log(repository);
 
-  //Repository Analysis Workflow
-  const analysis = await repositoryAnalysisWorkflow(repository);
+  // ===============================
+  // Repository Context Workflow
+  // ===============================
 
-  console.log("Repository Analysis:");
+  console.log("Building Repository Context...");
 
-  console.log(analysis);
+  const repositoryContextResult =
+    await repositoryContextWorkflow(repository);
 
-  if (!analysis.hasEslint) {
-    console.log("No ESLint configuration found.");
-
+  if (!repositoryContextResult.success) {
+    console.log(repositoryContextResult.error);
     return;
   }
 
-  //Lint workflow
-  const context = await lintWorkflow(repository);
+  const repositoryContext =
+    repositoryContextResult.data;
 
-  if (context.decision === "PASS") {
-    console.log("Linting passed. No changes required.");
+  // ===============================
+  // Jira Workflow
+  // ===============================
+
+  console.log("Fetching Jira Issue...");
+
+  const jiraResult =
+    await jiraWorkflow("SCRUM-1");
+
+  if (!jiraResult.success) {
+    console.log(jiraResult.error);
+    return;
   }
 
-  if (context.decision === "AUTO_FIX") {
-    const firstIssue = context.issues[0];
+  const jiraIssue =
+    jiraResult.data;
 
-    if (!firstIssue) {
-      console.log("No issues found to fix.");
-      return;
-    }
+  console.log("Jira Issue:");
+  console.log(jiraIssue);
 
-    const pwdResult = await runCommand("echo %cd%", repository.repositoryPath);
-    console.log("EXECUTING IN:", pwdResult.stdout);
+  // ===============================
+  // Branch Workflow
+  // ===============================
 
-    // Create branch once
-    const branchResult = await branchWorkflow(firstIssue, repository);
+  const pwdResult =
+    await runCommand(
+      "echo %cd%",
+      repository.repositoryPath,
+    );
 
-    if (!branchResult.success) {
-      console.log(branchResult.error);
-      return;
-    }
+  console.log("EXECUTING IN:");
+  console.log(pwdResult.stdout);
 
-    const MAX_FIX_CYCLES = 10;
+  const branchResult =
+    await branchWorkflow(
+      jiraIssue,
+      repository,
+    );
 
-    let fixedAny = false;
-
-    for (let cycle = 1; cycle <= MAX_FIX_CYCLES; cycle++) {
-      console.log(`Fix Cycle ${cycle}`);
-
-      const lintContext = await lintWorkflow(repository);
-
-      if (lintContext.decision === "PASS") {
-        console.log("All lint issues resolved.");
-
-        break;
-      }
-
-      const issue = lintContext.issues[0];
-
-      if (!issue) {
-        console.log("No issues found.");
-
-        break;
-      }
-
-      console.log(`Fixing: ${issue.message}`);
-
-      const fixResult = await autoFixWorkflow(issue, repository);
-
-      if (!fixResult.success) {
-        console.log("Unable to fix issue.");
-
-        break;
-      }
-
-      fixedAny = true;
-    }
-
-    if (fixedAny) {
-      const addResult = await gitAdd(repository);
-
-      if (!addResult.success) {
-        console.log("Unable to stage files.");
-        return;
-      }
-
-      console.log("Files staged.");
-
-      const diffResult = await gitDiff(repository);
-
-      if (!diffResult.success) {
-        console.log("Unable to generate diff.");
-        return;
-      }
-
-      const diff = diffResult.stdout;
-
-      if (!diff.trim()) {
-        console.log("No changes detected.");
-        return;
-      }
-
-      console.log("Diff:");
-      console.log(diff);
-
-      const commitResult = await commitWorkflow(repository, diff);
-
-      if (commitResult.success) {
-        const pushResult = await pushWorkflow(repository);
-
-        if (pushResult.success) {
-          const pr = await prWorkflow(diff);
-
-          const githubRepo = parseGitHubRepositoryUrl(repository.repositoryUrl);
-
-          const head = await getCurrentBranch(repository);
-
-          if (!pr.success || !pr.data) {
-            console.log(pr.error);
-            return;
-          }
-
-          const prContext = {
-            owner: githubRepo.owner,
-            repo: githubRepo.repo,
-            head,
-            base: "main",
-            title: pr.data.title,
-            description: pr.data.description,
-          };
-
-          const prCreation = await createPullRequestWorkflow(prContext);
-
-          if (!prCreation.success) {
-            console.log(prCreation.error);
-            return;
-          }
-
-          console.log("PR Created:");
-          console.log(prCreation.data);
-        }
-      }
-    }
+  if (!branchResult.success) {
+    console.log(branchResult.error);
+    return;
   }
+
+  console.log("Branch:");
+  console.log(branchResult.data);
+
+  // ===============================
+  // Implementation Planning
+  // ===============================
+
+  console.log("Generating Implementation Plan...");
+
+  const implementationPlanResult =
+    await issueResolutionWorkflow(
+      jiraIssue,
+      repositoryContext,
+    );
+
+  if (!implementationPlanResult.success) {
+    console.log(implementationPlanResult.error);
+    return;
+  }
+
+  console.log("Implementation Plan:");
+  console.log(implementationPlanResult.data);
+
   console.log("Orchestrator Finished");
 }
