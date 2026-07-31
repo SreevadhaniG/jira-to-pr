@@ -40,6 +40,11 @@ ${file.content}
       (file) => `
 ## ${file.relativePath}
 
+Required Changes:
+${file.requiredChanges}
+
+Current Contents:
+
 \`\`\`
 ${file.content}
 \`\`\`
@@ -68,9 +73,11 @@ Update the implementation to resolve the validation errors while preserving all 
   return `
 You are an experienced software engineer responsible for implementing Jira issues.
 
-You have already identified the relevant source files.
+An implementation plan has already been prepared.
 
-Your task is to modify ONLY the provided files to satisfy the Jira issue.
+Each source file includes the specific changes that must be implemented.
+
+Your task is to implement those changes while preserving existing functionality and following the project's conventions.
 
 ==============================
 JIRA ISSUE
@@ -110,15 +117,21 @@ TASK
 ==============================
 
 1. Understand the Jira issue.
-2. If previous validation output is provided:
+2. Review the required changes for each source file.
+3. Implement the required changes for every provided file.
+4. If previous validation output is provided:
    - Analyze the validation output carefully.
    - Fix every reported issue.
    - Preserve all previously correct changes.
-3. Modify ONLY the provided files.
-4. Preserve existing functionality.
-5. Follow the existing project style and conventions.
-6. Do not invent files that were not provided.
-7. Return ONLY the files that require changes.
+5. Modify ONLY the provided files.
+6. Preserve all unrelated functionality.
+7. Follow the existing project style and conventions.
+8. Do not modify files beyond the scope of the implementation plan.
+9. Return ONLY the files whose contents changed.
+
+==============================
+VERIFICATION
+==============================
 
 Determine the sequence of commands required to verify your implementation.
 
@@ -135,6 +148,20 @@ Examples:
 Prefer project-specific commands whenever available.
 
 Do not include unnecessary commands.
+
+==============================
+IMPLEMENTATION RULES
+==============================
+
+Each source file contains a "Required Changes" section.
+
+Treat it as the implementation objective for that file.
+
+Implement the requested changes while preserving unrelated behavior.
+
+Do not perform unrelated refactoring or introduce additional functionality unless it is required to satisfy the Jira issue or resolve validation errors.
+
+Return complete file contents for every modified file.
 
 ==============================
 OUTPUT
@@ -160,12 +187,18 @@ The JSON must exactly match this schema:
 
 Rules:
 
+- The response must consist of a single valid JSON object.
+- The first character of the response must be '{'.
+- The last character of the response must be '}'.
+- Do not output any text before or after the JSON object.
+- Do not use markdown.
+- Do not use code fences.
+- Do not include explanations.
 - Return complete file contents.
 - Return ONLY files that were modified.
 - Do not return partial snippets.
-- Do not use markdown.
-- Do not wrap the JSON in code fences.
-- Do not include explanations.
 - Return verification commands in execution order.
+- Some provided files may not exist. If a provided file does not exist, create it.
+- Do not create any files that are not listed in the implementation plan.
 `;
 }

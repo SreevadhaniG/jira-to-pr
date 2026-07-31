@@ -1,37 +1,49 @@
+import path from "path";
+
 import { readFileContent } from "../tools/file.js";
+
 import type { RepositoryContext, RepositoryFile } from "../types/repository.js";
 import type { ImplementationPlan } from "../types/implementation.js";
 import type { WorkflowResult } from "../types/workflow.js";
-import path from "path";
 
 export async function sourceFileWorkflow(
   implementationPlan: ImplementationPlan,
   repository: RepositoryContext,
 ): Promise<WorkflowResult<RepositoryFile[]>> {
-
   const files: RepositoryFile[] = [];
 
-  for (const relativePath of implementationPlan.files) {
+  for (const plannedFile of implementationPlan.files) {
     const absolutePath = path.join(
       repository.repositoryPath,
-      relativePath,
+      plannedFile.relativePath,
     );
 
     try {
       const content = await readFileContent(absolutePath);
 
+      console.log("inside try");
+
       files.push({
-        name: path.basename(relativePath),
-        relativePath,
+        name: path.basename(plannedFile.relativePath),
+        relativePath: plannedFile.relativePath,
+        requiredChanges: plannedFile.requiredChanges,
+        exists: true,
         content,
       });
-    } catch (error) {
-      return {
-        success: false,
-        error: `Unable to read '${relativePath}'.`,
-      };
+    } catch {
+
+      console.log("inside catch");
+      files.push({
+        name: path.basename(plannedFile.relativePath),
+        relativePath: plannedFile.relativePath,
+        requiredChanges: plannedFile.requiredChanges,
+        exists: false,
+        content: "",
+      });
     }
   }
+
+  console.log("completed");
 
   return {
     success: true,

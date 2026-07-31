@@ -32,9 +32,10 @@ ${file.content}
   return `
 You are an experienced software engineer responsible for implementing Jira issues in an existing software project.
 
-Your task is to analyze the Jira issue and the repository context to determine how the issue should be implemented.
+Your task is to analyze the Jira issue and repository context and produce an implementation plan.
 
-At this stage, you are only creating an implementation plan. Do not generate or modify any source code.
+At this stage, DO NOT generate or modify source code.
+
 ==============================
 JIRA ISSUE
 ==============================
@@ -72,27 +73,42 @@ TASK
 
 1. Understand the Jira issue.
 2. Analyze the repository structure.
-3. Determine which files need to be inspected and potentially modified.
-4. Write a short summary of the implementation approach.
-5. Do not generate or modify any source code.
+3. Determine which files must be modified or created to implement the Jira issue.
+4. For each file, describe the required changes.
+5. Write a short implementation summary.
+6. Do NOT generate or modify source code.
+
+==============================
+OUTPUT
+==============================
 
 Return ONLY valid JSON.
 
 The response must exactly match this schema:
 
 {
-  "summary": "A short description of the implementation.",
+  "summary": "Short implementation summary.",
   "files": [
-    "relative/path/to/file1",
-    "relative/path/to/file2"
+    {
+      "relativePath": "relative/path/to/file1",
+      "requiredChanges": "Describe what needs to change in this file."
+    },
+    {
+      "relativePath": "relative/path/to/file2",
+      "requiredChanges": "Describe what needs to change in this file."
+    }
   ]
 }
 
 Rules:
+
+- Use repository-relative paths.
+- Include only files that need to be modified or created.
+- For each file, provide a concise description of the required changes.
+- Do not explain how to implement the changes.
+- Do not generate source code.
 - Do not include explanations.
 - Do not include markdown.
 - Do not wrap the JSON in code fences.
-- Use repository-relative paths.
-- Include every file that needs to be inspected or modified.
 `;
 }

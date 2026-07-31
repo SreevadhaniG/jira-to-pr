@@ -1,3 +1,5 @@
+import { repositoryResolutionWorkflow } from "../workflows/repositoryResolutionWorkflow.js";
+import { cloneRepositoryWorkflow } from "../workflows/cloneRepositoryWorkflow.js";
 import { repositoryContextWorkflow } from "../workflows/repositoryContextWorkflow.js";
 import { jiraWorkflow } from "../workflows/jiraWorkflow.js";
 import { branchWorkflow } from "../workflows/branchWorkflow.js";
@@ -16,17 +18,62 @@ import type { CodeGenerationResult } from "../types/codeGeneration.js";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 
+//===============================
+// Orchestrator
+//===============================
+
 export async function startOrchestrator() {
   console.log("Orchestrator Started");
 
-  const repository = {
-    repositoryUrl: process.env.TEST_REPOSITORY_URL || "",
-    repositoryPath: process.env.TEST_REPOSITORY_LINK || "",
-    exists: true,
-  };
+  const repositoryUrl = process.env.TEST_REPOSITORY_URL;
+
+  if (!repositoryUrl) {
+    console.log("TEST_REPOSITORY_URL is not configured.");
+    return;
+  }
+
+  const rl = createInterface({
+    input,
+    output,
+  });
+
+  // ===============================
+  // Repository Resolution Workflow
+  // ===============================
+
+  console.log("Preparing Repository...");
+
+  const repositoryResult = await repositoryResolutionWorkflow(repositoryUrl);
+
+  if (!repositoryResult.success) {
+    console.log(repositoryResult.error);
+    rl.close();
+    return;
+  }
+
+  const repository = repositoryResult.data;
 
   console.log("Repository Info:");
   console.log(repository);
+
+  // ===============================
+  // Clone Repository Workflow
+  // ===============================
+
+  if (!repository.exists) {
+    console.log("Repository not found locally.");
+    console.log("Cloning repository...");
+
+    const cloneResult = await cloneRepositoryWorkflow(repository);
+
+    if (!cloneResult.success) {
+      console.log(cloneResult.error);
+      rl.close();
+      return;
+    }
+  } else {
+    console.log("Repository already exists.");
+  }
 
   // ===============================
   // Repository Context Workflow
@@ -38,21 +85,28 @@ export async function startOrchestrator() {
 
   if (!repositoryContextResult.success) {
     console.log(repositoryContextResult.error);
+    rl.close();
     return;
   }
 
   const repositoryContext = repositoryContextResult.data;
 
+  console.log("Repository Context:");
+  console.log(repositoryContext);
+
   // ===============================
   // Jira Workflow
   // ===============================
 
+  const jiraIssueKey = await rl.question("\nEnter Jira Issue Key: ");
+
   console.log("Fetching Jira Issue...");
 
-  const jiraResult = await jiraWorkflow("SCRUM-1");
+  const jiraResult = await jiraWorkflow(jiraIssueKey.trim());
 
   if (!jiraResult.success) {
     console.log(jiraResult.error);
+    rl.close();
     return;
   }
 
@@ -236,11 +290,6 @@ export async function startOrchestrator() {
 
   console.log("\nBranch:");
   console.log(branchResult.data);
-
-  const rl = createInterface({
-    input,
-    output,
-  });
 
   const answer = await rl.question(
     "\nWould you like to publish the changes? (y/n): ",

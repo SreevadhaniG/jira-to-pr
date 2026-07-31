@@ -7,6 +7,8 @@ export interface RepositoryContext {
 export interface RepositoryFile {
   name: string;
   relativePath: string;
+  requiredChanges: string;
+  exists: boolean;
   content: string;
 }
 

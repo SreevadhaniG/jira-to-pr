@@ -12,7 +12,6 @@ import type { WorkflowResult } from "../types/workflow.js";
 export async function repositoryContextWorkflow(
   repository: RepositoryContext,
 ): Promise<WorkflowResult<RepositoryMetadata>> {
-  console.log("Building repository context...");
 
   try {
     const directoryTree = await getDirectoryTree(
