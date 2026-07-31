@@ -10,6 +10,8 @@ export async function validationWorkflow(
 ): Promise<WorkflowResult<ValidationResult>> {
   console.log("Validating implementation...");
 
+  console.log("Repository Path:", repository.repositoryPath);
+
   for (const command of commands) {
     console.log(`Running: ${command}`);
 

@@ -6,7 +6,8 @@ import type { WorkflowResult } from "../types/workflow.js";
 export async function repositoryResolutionWorkflow(
   repositoryUrl: string,
 ): Promise<WorkflowResult<RepositoryContext>> {
-  const repositoryPath = getRepositoryPath(repositoryUrl);
+  const repositoryPath =
+    process.env.TEST_REPOSITORY_LINK ?? getRepositoryPath(repositoryUrl);
 
   const exists = pathExists(repositoryPath);
 

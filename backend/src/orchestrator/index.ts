@@ -9,6 +9,7 @@ import { implementationWorkflow } from "../workflows/implementationWorkflow.js";
 import { writeFilesWorkflow } from "../workflows/writeFilesWorkflow.js";
 import { validationWorkflow } from "../workflows/validationWorkflow.js";
 import { publishWorkflow } from "../workflows/publishWorkflow.js";
+import { terminalActionWorkflow } from "../workflows/terminalActionWorkflow.js";
 
 import { runCommand } from "../tools/terminal.js";
 
@@ -248,14 +249,24 @@ export async function startOrchestrator() {
     previousValidation = validationResult.data;
 
     if (previousValidation.passed) {
-      console.log("✅ Validation passed.");
+      console.log("Validation passed.");
       implementationValidated = true;
       break;
     }
 
-    console.log("❌ Validation failed.");
+    console.log("Validation failed.");
     console.log(`Command: ${previousValidation.command}`);
     console.log(previousValidation.output);
+
+    const terminalActionsExecuted = await terminalActionWorkflow(
+      previousValidation,
+      repository,
+    );
+
+    if (terminalActionsExecuted) {
+      console.log("Re-running validation...");
+      continue;
+    }
 
     if (cycle === MAX_CYCLES) {
       console.log("\nMaximum implementation attempts reached.");
